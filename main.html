@@ -43,10 +43,19 @@ $(function ready(){
 	$monitor.append( renderer.domElement );
 // 	var controls	= new THREE.OrbitControls( camera, renderer.domElement );
 	
-	var rote = 0;
-	var startFlag = false;
+	
+	var raycaster = new THREE.Raycaster();
+	var mouse = new THREE.Vector2();
+	function onMouseMove( event ) {
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;		
+	}
+	window.addEventListener( 'mousemove', onMouseMove, false );
 	
 	//애니메이션
+	var rote = 0;
+	var startFlag = false;
+	var buttonHover = false;
 	function render() {
 // 		controls.update();
 		if( startFlag === false ){
@@ -56,80 +65,143 @@ $(function ready(){
 			}
 			scene.rotation.y = rote * Math.PI / 180;
 		}
+
+
+
 		requestAnimationFrame( render );
+
+		if(startFlag === true){
+			$monitor.css("cursor", "default");
+			raycaster.setFromCamera( mouse, camera );
+			var intersects = raycaster.intersectObjects( scene.children );
+			buttonHover = false;
+			for(var i=0; i<intersects.length; i++){
+				if(intersects[ i ].object.name === "pachinko_button"){
+					$monitor.css("cursor", "pointer");
+					buttonHover = true;
+					break;
+				}
+			}
+		}
+		
 		renderer.render( scene, camera );
 		TWEEN.update();
 	}
 	render();
 	
-	
-// 	var menu = document.createElement("canvas");
-// 	menu.width = 500;
-// 	menu.height = 500;
-// 	var menuCtx = menu.getContext("2d");
-	
 	var spotLight = new THREE.SpotLight( 0xffffff );
 	spotLight.position.set( 500, 500, 500 );
 	scene.add( spotLight );
-	var spotLightHelper = new THREE.SpotLightHelper( spotLight );
-	scene.add( spotLightHelper );
+// 	var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+// 	scene.add( spotLightHelper );
 	var spotLight = new THREE.SpotLight( 0xffffff );
 	spotLight.position.set( -500, -500, -500 );
 	scene.add( spotLight );
-	var spotLightHelper = new THREE.SpotLightHelper( spotLight );
-	scene.add( spotLightHelper );
+// 	var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+// 	scene.add( spotLightHelper );
+	
+	var rainbowTexture = THREE.ImageUtils.loadTexture('img/neon.jpg');
+	var greenTexture = THREE.ImageUtils.loadTexture('img/green.jpg');
+	var redTexture = THREE.ImageUtils.loadTexture('img/red.jpg'); 
+	var blackTexture = THREE.ImageUtils.loadTexture('img/black.jpg'); 
+	var goldTexture = THREE.ImageUtils.loadTexture('img/gold.jpg'); 
+	var filreCrackerTexture = THREE.ImageUtils.loadTexture('img/firecracker.jpg');
+	
+// 	rainbowTexture.wrapS = rainbowTexture.wrapT = THREE.RepeatWrapping;
+// 	rainbowTexture.repeat.set( 2, 2 );
 	
 	var pachinko = new THREE.Group();
 	(function monitor(){
-		var geometry = new THREE.BoxGeometry( 150, 250, 20 ); 
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		
+		// 뒤
+		var geometry = new THREE.BoxGeometry( 110, 250, 20 ); 
+		var material = new THREE.MeshPhongMaterial( {map: rainbowTexture} );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.z = -65;
-		pachinko.add( mesh );
+		scene.add( mesh );
 		
+		// 중간
+		var geometry = new THREE.BoxGeometry( 110, 250, 20 ); 
+		var material = new THREE.MeshPhongMaterial( {map: redTexture} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.z = 0;
+		scene.add( mesh );
+		
+		// 유리
+		var geometry = new THREE.BoxGeometry( 110, 250, 1 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,1)"} );
+		material.transparent = true;
+		material.opacity = 0.3;
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.z = 70;
+		mesh.renderOrder = 999;
+		scene.add( mesh );
+		
+		// 좌
 		var geometry = new THREE.BoxGeometry( 20, 250, 150 ); 
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var material = new THREE.MeshPhongMaterial( {map: rainbowTexture} );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.x = 65;
-		pachinko.add( mesh );
+		scene.add( mesh );
 		
+		// 우
 		var geometry = new THREE.BoxGeometry( 20, 250, 150 ); 
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var material = new THREE.MeshPhongMaterial( {map: rainbowTexture} );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.x = -65;
-		pachinko.add( mesh );
+		scene.add( mesh );
 		
+		// 위
 		var geometry = new THREE.BoxGeometry( 150, 20, 150 ); 
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var material = new THREE.MeshPhongMaterial( {map: rainbowTexture} );
 		var mesh = new THREE.Mesh( geometry, material );
-		mesh.position.y = 130;
-		pachinko.add( mesh );
+		mesh.position.y = 135;
+		scene.add( mesh );
+	})();
+	
+	(function monitorHider(){
+		var geometry = new THREE.BoxGeometry( 110, 5, 40 ); 
+		var material = new THREE.MeshPhongMaterial( {map: blackTexture} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.set(0,110,60);
+		mesh.rotation.x = -60 * Math.PI / 180;
+		scene.add( mesh );
+		
+		var geometry = new THREE.BoxGeometry( 110, 5, 40 ); 
+		var material = new THREE.MeshPhongMaterial( {map: blackTexture} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.set(0,20,60);
+		mesh.rotation.x = 60 * Math.PI / 180;
+		scene.add( mesh );
 	})();
 	
 	(function handlePan(){
 		var geometry = new THREE.BoxGeometry( 150, 10, 50 ); 
-	// 	var texture = new THREE.Texture(menu);
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var material = new THREE.MeshPhongMaterial( {map: rainbowTexture, color: "rgba(255,255,0,1)"} );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.set(0,3,100);
 		mesh.rotation.x = 15 * Math.PI / 180;
-		pachinko.add( mesh );
+		scene.add( mesh );
 	})();
 	
 	(function handleBottom(){
 		var geometry = new THREE.BoxGeometry( 150, 125, 50 ); 
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var material = new THREE.MeshPhongMaterial( {map: rainbowTexture} );
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.position.set(0, -62.5, 100);
-		pachinko.add( mesh );
+		scene.add( mesh );
 	})();
 	
-	(function handleBottom(){
-		var geometry = new THREE.BoxGeometry( 150, 125, 50 ); 
-		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
-		var mesh = new THREE.Mesh( geometry, material );
-		mesh.position.set(0, -62.5, 100);
+	var button = null; 
+	(function mkButton(){
+		var geometry = new THREE.SphereGeometry( 20, 16, 16 );
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(125,255,30,0.8)"} );
+		button = new THREE.Mesh( geometry, material );
+		button.name = "pachinko_button";
+		button.position.set(0, 0, 100);
+		scene.add( button );
 	})();
+	
 	scene.add( pachinko );
 	
 	/**
@@ -152,7 +224,9 @@ $(function ready(){
 				chipColor = 0;
 			}
 			$("#list").append( $item );
-			$("#start_btn").prop("disabled", false);
+			if( $("#list .item").length > 1 ){
+				$("#start_btn").prop("disabled", false);
+			}
 		}
 	});
 	
@@ -164,15 +238,71 @@ $(function ready(){
 		$(this).find(".item_del_btn").hide();
 	}).on("click", ".item_del_btn", function(){
 		$(this).closest(".item").remove();
-		if( $("#list").find(".item").length === 0 ){
+		if( $("#list").find(".item").length < 2 ){
 			$("#start_btn").prop("disabled", true);
 		}
 	});
 	
+	
+	function getTextCanvas(text){
+		var canvas = document.createElement("canvas");
+		canvas.width = 400;
+		canvas.height = 100;
+		var ctx = canvas.getContext("2d");
+		ctx.font = '50px bold';
+		ctx.textAlign = 'center';
+		ctx.textBaseline = "top";
+		ctx.fillStyle = '#000000';
+		ctx.fillRect(0,0,canvas.width,canvas.height);
+		ctx.fillStyle = '#ffffff';	
+		ctx.fillRect(20,20,canvas.width-40,canvas.height-40);
+		ctx.fillStyle = '#000000';
+		ctx.fillText(text,200,25);
+		return canvas;
+	}
+	
+	
+	// 테스트 아이템
+// 	var geometry = new THREE.BoxGeometry( 100, 25, 25 );
+// 	var map = new THREE.Texture(getTextCanvas("1"));
+// 	map.minFilter = THREE.LinearFilter;
+// 	map.magFilter = THREE.LinearFilter;
+// 	map.needsUpdate = true;
+// 	var material = new THREE.MeshBasicMaterial( { map: map, overdraw: true, transparent: true} );
+// 	var mesh = new THREE.Mesh( geometry, material );
+// 	mesh.position.set(0, 65, 40);
+// 	mesh.name = name;
+// 	scene.add( mesh );
+	
+	
+	window.items = [];
 	$("#start_btn").click(function(){
+		
+		for( var i=0; i<items.length; i++ ){
+			var item = scene.getObjectByName( items[i] );
+			scene.remove( item );
+		}
+		
+		items = [];
+		$("#list .item_name").each(function(){
+			var name = $(this).text();
+			items.push(name);
+			var canvas = getTextCanvas(name);
+			var geometry = new THREE.BoxGeometry( 100, 40, 25 );
+			var map = new THREE.Texture(canvas);
+			map.minFilter = THREE.LinearFilter;
+			map.magFilter = THREE.LinearFilter;
+			map.needsUpdate = true;
+			var material = new THREE.MeshBasicMaterial( { map: map, overdraw: true, transparent: true} );
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.position.set(0, 110, 40);
+			mesh.name = name;
+			scene.add( mesh );
+			
+		});
+		
 		startFlag = true;
 		var time = {y: scene.rotation.y * 180 / Math.PI};
-		console.log("타임", time);
 		var sceneRote = new TWEEN.Tween(time)
 		    .to({ y: 0 }, 500)
 		    .onUpdate(function() {
@@ -197,6 +327,79 @@ $(function ready(){
 		sceneRote.start();
 	});
 	
+	var endAnimation = true;
+	$("#viewer").mousedown(function(){
+		
+		if( endAnimation === false ){
+			return;
+		}
+		
+		// 섞기
+		var tmpItems = items;
+		items = [];
+		while( tmpItems.length > 0 ){
+			var randomNo = Math.floor( Math.random() * tmpItems.length );
+			var a = tmpItems.splice( randomNo, 1 );
+			items.push( a[0] );
+		}
+		
+		
+		endAnimation = false;
+		if( buttonHover === true ){
+			var buttonBottom = new TWEEN.Tween(button.position)
+		    .to({ y: -10 }, 100)
+		    .start();
+			
+			var cnt = 0;
+			var idx = 0;
+			var intervalTime = 40;
+			
+			function itemDown(){
+				// 아이템
+		    	var item = scene.getObjectByName( items[idx] );
+				
+				// 하나씩 내린다.
+		    	var animation = new TWEEN.Tween(item.position)
+		    	.to({y: 20}, intervalTime*2 + 20)
+		    	.onComplete(function(){
+		    		item.position.y = 110;
+		    	})
+		    	.start();
+
+				// 아이템 인덱스를 올리고, 최대라면, 0으로 변경
+		    	idx++;
+		    	if( items[idx] == null ){
+		    		idx = 0;
+		    	}
+		    	
+		    	// 속도를 낮추기위한 로직
+		    	clearInterval( interval );
+		    	intervalTime = intervalTime + 10;
+		    	
+		    	// 만약 속도가 510이라면, 그만함.
+		    	if( intervalTime === 510 ){
+		    		animation.onComplete(function(){
+			    		new TWEEN.Tween(item.position)
+				    	.to({y: 65}, 100)
+				    	.onComplete(function(){
+				    		var buttonTop = new TWEEN.Tween(button.position)
+						    .to({ y: 0 }, 100)
+						    .onComplete(function(){
+					    		endAnimation = true;
+						    })
+						    .start();
+				    	})
+				    	.start();
+		    		});
+		    		return;
+		    	}
+		    	interval = setInterval(itemDown, intervalTime);
+			}
+			var interval = setInterval(itemDown, intervalTime);
+			
+		}
+	});
+	
 });
 </script>
 </head>
@@ -207,7 +410,7 @@ $(function ready(){
 	</div>
 	<div class="right_bar_input">
 		<input id="item_input" class="form-control" type="text" placeholder="항목을 입력하세요.">
-		<button id="start_btn" type="button" class="btn btn-primary" disabled="disabled" style="width: 100%;">시작</button>
+		<button id="start_btn" type="button" class="btn btn-primary" disabled="disabled" style="width: 100%;">칩넣기</button>
 	</div>
 </div>
 
