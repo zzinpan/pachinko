@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css"/>
+<link rel="stylesheet" type="text/css" href="css/font-awesome-4.7.0/css/font-awesome.min.css"/>
+<style type="text/css">
+body{ margin: 0px; padding: 0px; font-family: sans-serif; }
+.main_viewer{ position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; }
+.right_bar{ position: absolute; right: 0px; top: 0px; width: 200px; height: 100%; padding: 0px 20px 0px 20px; background-color: rgba(255,255,255,0.2); }
+.right_bar_list{ position: relative; height: calc(100% - 100px); overflow: auto; }
+.right_bar_input{ height: 50px; }
+.item{ position: relative; height: 25px; width: 100%; margin-top: 10px; color: white; cursor: default; }
+.item_img_wrap{ width: 25px; height: 25px; display: inline-block; }
+.item_name_wrap{ width: 130px; height: 25px; display: inline-block; vertical-align: top; }
+.item_name{ margin-top: 3px; }
+.item_del_btn{ position: absolute; right: 0; top: 7px; cursor: pointer; display: none; }
+</style>
+<script type="text/javascript" src="js/jquery/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="js/threejs/three.min.js"></script>
+<script type="text/javascript" src="js/threejs/OrbitControls.js"></script>
+<script type="text/javascript" src="js/tween/Tween.js"></script>
+<script type="text/javascript" src="js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript">
+$(function ready(){
+	
+	var $monitor = $("#viewer");
+	var scene 		= new THREE.Scene(),
+		camera		= new THREE.PerspectiveCamera( 45, $monitor.width()/$monitor.height(), 0.1, 10000 ),
+		renderer	= new THREE.WebGLRenderer();
+	
+	//z축이 위로(오른손 방향 좌표계)
+	camera.position.set(0, 300, 500);
+	var cameraLook = new THREE.Vector3(0,0,0);
+	camera.lookAt( cameraLook );
+	
+	//렌더러 설정
+	renderer.setClearColor( '#000000' );
+	$(window).resize(function(){
+		renderer.setSize( $monitor.width(), $monitor.height() );	
+	}).resize();
+	$monitor.append( renderer.domElement );
+// 	var controls	= new THREE.OrbitControls( camera, renderer.domElement );
+	
+	var rote = 0;
+	var startFlag = false;
+	
+	//애니메이션
+	function render() {
+// 		controls.update();
+		if( startFlag === false ){
+			rote++;
+			if( 360 < rote ){
+				rote -= 360;
+			}
+			scene.rotation.y = rote * Math.PI / 180;
+		}
+		requestAnimationFrame( render );
+		renderer.render( scene, camera );
+		TWEEN.update();
+	}
+	render();
+	
+	
+// 	var menu = document.createElement("canvas");
+// 	menu.width = 500;
+// 	menu.height = 500;
+// 	var menuCtx = menu.getContext("2d");
+	
+	var spotLight = new THREE.SpotLight( 0xffffff );
+	spotLight.position.set( 500, 500, 500 );
+	scene.add( spotLight );
+	var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+	scene.add( spotLightHelper );
+	var spotLight = new THREE.SpotLight( 0xffffff );
+	spotLight.position.set( -500, -500, -500 );
+	scene.add( spotLight );
+	var spotLightHelper = new THREE.SpotLightHelper( spotLight );
+	scene.add( spotLightHelper );
+	
+	var pachinko = new THREE.Group();
+	(function monitor(){
+		var geometry = new THREE.BoxGeometry( 150, 250, 20 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.z = -65;
+		pachinko.add( mesh );
+		
+		var geometry = new THREE.BoxGeometry( 20, 250, 150 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.x = 65;
+		pachinko.add( mesh );
+		
+		var geometry = new THREE.BoxGeometry( 20, 250, 150 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.x = -65;
+		pachinko.add( mesh );
+		
+		var geometry = new THREE.BoxGeometry( 150, 20, 150 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.y = 130;
+		pachinko.add( mesh );
+	})();
+	
+	(function handlePan(){
+		var geometry = new THREE.BoxGeometry( 150, 10, 50 ); 
+	// 	var texture = new THREE.Texture(menu);
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.set(0,3,100);
+		mesh.rotation.x = 15 * Math.PI / 180;
+		pachinko.add( mesh );
+	})();
+	
+	(function handleBottom(){
+		var geometry = new THREE.BoxGeometry( 150, 125, 50 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.set(0, -62.5, 100);
+		pachinko.add( mesh );
+	})();
+	
+	(function handleBottom(){
+		var geometry = new THREE.BoxGeometry( 150, 125, 50 ); 
+		var material = new THREE.MeshPhongMaterial( {color: "rgba(255,255,255,0.2)"} );
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.position.set(0, -62.5, 100);
+	})();
+	scene.add( pachinko );
+	
+	/**
+		이벤트
+	**/
+	
+	var chipColor = 0;
+	$("#item_input").keydown(function(e){
+		if( e.keyCode === 13 ){
+	
+			var $this = $(this);
+			var itemName = $this.val();
+			
+			$this.val("");
+			var $item = $("#template .item").clone();
+			$item.find(".item_name").text( itemName );
+			$item.find(".item_img").attr("src", "img/chip-"+chipColor+".png");
+			chipColor++;
+			if( chipColor === 5 ){
+				chipColor = 0;
+			}
+			$("#list").append( $item );
+			$("#start_btn").prop("disabled", false);
+		}
+	});
+	
+	$("#list").on("mouseenter", ".item", function(e){
+		e.stopPropagation();
+		$(this).find(".item_del_btn").show();
+	}).on("mouseleave", ".item", function(e){
+		e.stopPropagation();
+		$(this).find(".item_del_btn").hide();
+	}).on("click", ".item_del_btn", function(){
+		$(this).closest(".item").remove();
+		if( $("#list").find(".item").length === 0 ){
+			$("#start_btn").prop("disabled", true);
+		}
+	});
+	
+	$("#start_btn").click(function(){
+		startFlag = true;
+		var time = {y: scene.rotation.y * 180 / Math.PI};
+		console.log("타임", time);
+		var sceneRote = new TWEEN.Tween(time)
+		    .to({ y: 0 }, 500)
+		    .onUpdate(function() {
+		    	scene.rotation.y = this.y * Math.PI / 180;
+		    })
+		    .onComplete(function(){
+				var cameraLookAt = new TWEEN.Tween(cameraLook)
+			    .to({ y: 50 }, 500)
+			    .onUpdate(function() {
+			    	camera.lookAt( cameraLook );
+			    })
+			    .start();
+		    });
+		
+		var cameraZoom = new TWEEN.Tween(camera.position)
+		    .to({ y: 50, z: 300 }, 500)
+		    .onUpdate(function() {
+		    	
+		    });
+		
+		sceneRote.chain(cameraZoom);
+		sceneRote.start();
+	});
+	
+});
+</script>
+</head>
+<body>
+<div id="viewer" class="main_viewer" style=""></div>
+<div id="rightBar" class="right_bar">
+	<div id="list" class="right_bar_list">
+	</div>
+	<div class="right_bar_input">
+		<input id="item_input" class="form-control" type="text" placeholder="항목을 입력하세요.">
+		<button id="start_btn" type="button" class="btn btn-primary" disabled="disabled" style="width: 100%;">시작</button>
+	</div>
+</div>
+
+
+
+<!-- 템플릿 -->
+<div id="template" style="display: none;">
+
+<div class="item">
+	<div class="item_img_wrap">
+		<img class="item_img" alt="" src="img/chip-0.png" width="25px" height="25px">
+	</div>
+	<div class="item_name_wrap">
+		<div class="item_name">
+			신명철
+		</div>
+	</div>
+	<i class="item_del_btn fa fa-times" aria-hidden="true"></i>
+</div>
+
+</div>
+</body>
+</html>
