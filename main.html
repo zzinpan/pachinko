@@ -328,7 +328,7 @@ $(function ready(){
 	});
 	
 	var endAnimation = true;
-	$("#viewer").mousedown(function(){
+	function mousedown(){
 		
 		if( endAnimation === false ){
 			return;
@@ -398,7 +398,9 @@ $(function ready(){
 			var interval = setInterval(itemDown, intervalTime);
 			
 		}
-	});
+	}
+	$("#viewer").mousedown(mousedown);
+	$("#viewer").touchstart(mousedown);
 	
 });
 </script>
