@@ -399,8 +399,8 @@ $(function ready(){
 			
 		}
 	}
-	$("#viewer").mousedown(mousedown);
-	$("#viewer").touchstart(mousedown);
+	$("#viewer").mousedown(mousedown)
+				.bind("touchstart", mousedown);
 	
 });
 </script>
